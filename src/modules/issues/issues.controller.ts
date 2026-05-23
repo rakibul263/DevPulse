@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { createIssuesIntoDB, getSingleIssueIntoDB, updateIssueIntoDB } from "./issues.services";
+import { createIssuesIntoDB, deleteIssueIntoDB, getSingleIssueIntoDB, updateIssueIntoDB } from "./issues.services";
 import { stringify } from "node:querystring";
 
 export const createIssuesController = async (req: Request, res: Response) => {
@@ -127,3 +127,28 @@ export const updateIssueController = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteIssueController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await deleteIssueIntoDB(String(id));
+
+    if (result.notFound) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Issue deleted successfully",
+    });
+  } catch (error: any) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+      errors: error.message,
+    });
+  }
+};

@@ -173,3 +173,17 @@ export const updateIssueIntoDB = async (params: UpdateIssueParams) => {
   };
 };
 
+export const deleteIssueIntoDB = async (id: string) => {
+  const checkResult = await pool.query(
+    "SELECT * FROM issues WHERE id = $1",
+    [id]
+  );
+
+  if (checkResult.rows.length === 0) {
+    return { notFound: true };
+  }
+
+  await pool.query("DELETE FROM issues WHERE id = $1", [id]);
+
+  return { success: true };
+};
