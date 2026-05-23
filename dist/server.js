@@ -2,48 +2,25 @@
         import { createRequire } from 'module';
         const require = createRequire(import.meta.url);
   
-"use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 
 // src/app.ts
-var import_express3 = __toESM(require("express"));
+import express from "express";
 
 // src/modules/auth/auth.router.ts
-var import_express = require("express");
+import { Router } from "express";
 
 // src/modules/auth/auth.controller.ts
-var import_http_status_codes = require("http-status-codes");
+import { StatusCodes } from "http-status-codes";
 
 // src/modules/auth/auth.services.ts
-var import_bcrypt = __toESM(require("bcrypt"));
+import bcrypt from "bcrypt";
 
 // src/database/db.ts
-var import_pg = require("pg");
+import { Pool } from "pg";
 
 // src/config/index.ts
-var import_dotenv = __toESM(require("dotenv"));
-import_dotenv.default.config();
+import dotenv from "dotenv";
+dotenv.config();
 var config_default = {
   port: Number(process.env.PORT) || 3e3,
   database_url: process.env.DATABASE_URL,
@@ -51,7 +28,7 @@ var config_default = {
 };
 
 // src/database/db.ts
-var pool = new import_pg.Pool({ connectionString: config_default.database_url });
+var pool = new Pool({ connectionString: config_default.database_url });
 var initDatabase = async () => {
   try {
     const createUsersTable = `
@@ -87,9 +64,9 @@ var initDatabase = async () => {
 var db_default = pool;
 
 // src/utils/jwt.ts
-var import_jsonwebtoken = __toESM(require("jsonwebtoken"));
+import jwt from "jsonwebtoken";
 var generateToken = (payload) => {
-  return import_jsonwebtoken.default.sign(payload, config_default.jwt_secret, { expiresIn: "1d" });
+  return jwt.sign(payload, config_default.jwt_secret, { expiresIn: "1d" });
 };
 
 // src/modules/auth/auth.services.ts
@@ -103,7 +80,7 @@ var signUpIntoDB = async (payload) => {
   if (existingUser.rows.length > 0) {
     throw new Error("Email already exists");
   }
-  const hashedPassword = await import_bcrypt.default.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const insertQuery = `
     INSERT INTO users (name, email, password, role)
     VALUES ($1, $2, $3, $4)
@@ -127,7 +104,7 @@ var loginUserIntoDB = async (payload) => {
     throw new Error("Invalid email or password");
   }
   const user = result.rows[0];
-  const isPasswordValid = await import_bcrypt.default.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error("Invalid email or password");
   }
@@ -148,19 +125,19 @@ var signupController = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
-      return res.status(import_http_status_codes.StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: "Name, email, and password are required"
       });
     }
     const newUser = await signUpIntoDB({ name, email, password, role });
-    return res.status(import_http_status_codes.StatusCodes.CREATED).json({
+    return res.status(StatusCodes.CREATED).json({
       success: true,
       message: "User registered successfully",
       data: newUser
     });
   } catch (error) {
-    return res.status(import_http_status_codes.StatusCodes.BAD_REQUEST).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
       message: error.message
     });
@@ -170,19 +147,19 @@ var loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(import_http_status_codes.StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: "Email and password are required"
       });
     }
     const data = await loginUserIntoDB({ email, password });
-    return res.status(import_http_status_codes.StatusCodes.OK).json({
+    return res.status(StatusCodes.OK).json({
       success: true,
       message: "Login successful",
       data
     });
   } catch (error) {
-    return res.status(import_http_status_codes.StatusCodes.UNAUTHORIZED).json({
+    return res.status(StatusCodes.UNAUTHORIZED).json({
       success: false,
       message: error.message
     });
@@ -190,28 +167,28 @@ var loginController = async (req, res) => {
 };
 
 // src/modules/auth/auth.router.ts
-var router = (0, import_express.Router)();
+var router = Router();
 router.post("/signup", signupController);
 router.post("/login", loginController);
 var auth_router_default = router;
 
 // src/modules/issues/issues.routes.ts
-var import_express2 = require("express");
+import { Router as Router2 } from "express";
 
 // src/middlewares/auth.middleware.ts
-var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"));
-var import_http_status_codes2 = require("http-status-codes");
+import jwt2 from "jsonwebtoken";
+import { StatusCodes as StatusCodes2 } from "http-status-codes";
 var authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(import_http_status_codes2.StatusCodes.UNAUTHORIZED).json({
+    return res.status(StatusCodes2.UNAUTHORIZED).json({
       success: false,
       message: "Missing token, Authorization header required"
     });
   }
   const token = authHeader.replace("Bearer ", "").trim();
   try {
-    const decoded = import_jsonwebtoken2.default.verify(token, config_default.jwt_secret);
+    const decoded = jwt2.verify(token, config_default.jwt_secret);
     req.user = {
       id: decoded.id,
       name: decoded.name,
@@ -219,7 +196,7 @@ var authenticateJWT = (req, res, next) => {
     };
     next();
   } catch (error) {
-    return res.status(import_http_status_codes2.StatusCodes.UNAUTHORIZED).json({
+    return res.status(StatusCodes2.UNAUTHORIZED).json({
       success: false,
       message: "Invalid or expired token"
     });
@@ -227,7 +204,7 @@ var authenticateJWT = (req, res, next) => {
 };
 
 // src/modules/issues/issues.controller.ts
-var import_http_status_codes3 = require("http-status-codes");
+import { StatusCodes as StatusCodes3 } from "http-status-codes";
 
 // src/modules/issues/issues.services.ts
 var createIssuesIntoDB = async (payload) => {
@@ -399,7 +376,7 @@ var createIssuesController = async (req, res) => {
   try {
     const { title, description, type } = req.body;
     if (!title || !description || !type) {
-      return res.status(import_http_status_codes3.StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes3.BAD_REQUEST).json({
         success: false,
         message: "Title, description, and type are required"
       });
@@ -410,13 +387,13 @@ var createIssuesController = async (req, res) => {
       type,
       reporter_id: 1
     });
-    return res.status(import_http_status_codes3.StatusCodes.CREATED).json({
+    return res.status(StatusCodes3.CREATED).json({
       success: true,
       message: "Issue created successfully",
       data
     });
   } catch (error) {
-    return res.status(import_http_status_codes3.StatusCodes.INTERNAL_SERVER_ERROR).json({
+    return res.status(StatusCodes3.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Cannot Create Issues.",
       error: error.message
@@ -431,12 +408,12 @@ var getAllIssuesController = async (req, res) => {
       type,
       status
     });
-    res.status(import_http_status_codes3.StatusCodes.OK).json({
+    res.status(StatusCodes3.OK).json({
       success: true,
       data
     });
   } catch (error) {
-    res.status(import_http_status_codes3.StatusCodes.INTERNAL_SERVER_ERROR).json({
+    res.status(StatusCodes3.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Cannot Create Issues.",
       error: error.message
@@ -448,17 +425,17 @@ var getSingleController = async (req, res) => {
     const { id } = req.params;
     const data = await getSingleIssueIntoDB(String(id));
     if (!data) {
-      return res.status(import_http_status_codes3.StatusCodes.NOT_FOUND).json({
+      return res.status(StatusCodes3.NOT_FOUND).json({
         success: false,
         message: "Issue not found"
       });
     }
-    return res.status(import_http_status_codes3.StatusCodes.OK).json({
+    return res.status(StatusCodes3.OK).json({
       success: true,
       data
     });
   } catch (error) {
-    return res.status(import_http_status_codes3.StatusCodes.INTERNAL_SERVER_ERROR).json({
+    return res.status(StatusCodes3.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error",
       errors: error.message
@@ -471,7 +448,7 @@ var updateIssueController = async (req, res) => {
     const { title, description, type, status } = req.body;
     const currentUser = req.user;
     if (!currentUser) {
-      return res.status(import_http_status_codes3.StatusCodes.UNAUTHORIZED).json({
+      return res.status(StatusCodes3.UNAUTHORIZED).json({
         success: false,
         message: "Unauthorized"
       });
@@ -485,30 +462,30 @@ var updateIssueController = async (req, res) => {
       currentUser
     });
     if (result.notFound) {
-      return res.status(import_http_status_codes3.StatusCodes.NOT_FOUND).json({
+      return res.status(StatusCodes3.NOT_FOUND).json({
         success: false,
         message: "Issue not found"
       });
     }
     if (result.forbidden) {
-      return res.status(import_http_status_codes3.StatusCodes.FORBIDDEN).json({
+      return res.status(StatusCodes3.FORBIDDEN).json({
         success: false,
         message: result.message
       });
     }
     if (result.conflict) {
-      return res.status(import_http_status_codes3.StatusCodes.CONFLICT).json({
+      return res.status(StatusCodes3.CONFLICT).json({
         success: false,
         message: result.message
       });
     }
-    return res.status(import_http_status_codes3.StatusCodes.OK).json({
+    return res.status(StatusCodes3.OK).json({
       success: true,
       message: "Issue updated successfully",
       data: result.data
     });
   } catch (error) {
-    return res.status(import_http_status_codes3.StatusCodes.INTERNAL_SERVER_ERROR).json({
+    return res.status(StatusCodes3.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error",
       errors: error.message
@@ -520,17 +497,17 @@ var deleteIssueController = async (req, res) => {
     const { id } = req.params;
     const result = await deleteIssueIntoDB(String(id));
     if (result.notFound) {
-      return res.status(import_http_status_codes3.StatusCodes.NOT_FOUND).json({
+      return res.status(StatusCodes3.NOT_FOUND).json({
         success: false,
         message: "Issue not found"
       });
     }
-    return res.status(import_http_status_codes3.StatusCodes.OK).json({
+    return res.status(StatusCodes3.OK).json({
       success: true,
       message: "Issue deleted successfully"
     });
   } catch (error) {
-    return res.status(import_http_status_codes3.StatusCodes.INTERNAL_SERVER_ERROR).json({
+    return res.status(StatusCodes3.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error",
       errors: error.message
@@ -539,7 +516,7 @@ var deleteIssueController = async (req, res) => {
 };
 
 // src/modules/issues/issues.routes.ts
-var router2 = (0, import_express2.Router)();
+var router2 = Router2();
 router2.get("/", getAllIssuesController);
 router2.get("/:id", getSingleController);
 router2.post("/", createIssuesController);
@@ -548,8 +525,8 @@ router2.delete("/:id", authenticateJWT, deleteIssueController);
 var issues_routes_default = router2;
 
 // src/app.ts
-var app = (0, import_express3.default)();
-app.use(import_express3.default.json());
+var app = express();
+app.use(express.json());
 app.use("/api/auth", auth_router_default);
 app.use("/api/issues", issues_routes_default);
 var app_default = app;
