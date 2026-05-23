@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { createIssuesIntoDB, getSingleIssueIntoDB } from "./issues.services";
+import { createIssuesIntoDB, getSingleIssueIntoDB, updateIssueIntoDB } from "./issues.services";
 import { stringify } from "node:querystring";
 
 export const createIssuesController = async (req: Request, res: Response) => {
@@ -68,3 +68,62 @@ export const getSingleController = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const updateIssueController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, description, type, status } = req.body;
+    const currentUser = (req as any).user;
+
+    if (!currentUser) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const result = await updateIssueIntoDB({
+      id: String(id),
+      title,
+      description,
+      type,
+      status,
+      currentUser,
+    });
+
+    if (result.notFound) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    if (result.forbidden) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    if (result.conflict) {
+      return res.status(StatusCodes.CONFLICT).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Issue updated successfully",
+      data: result.data,
+    });
+  } catch (error: any) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+      errors: error.message,
+    });
+  }
+};
+
