@@ -4,3 +4,9 @@ export interface TIssueData {
   type: string;
   reporter_id: number;
 };
+
+export interface GetIssuesParams {
+  sort?: string;
+  type?: string;
+  status?: string;
+};

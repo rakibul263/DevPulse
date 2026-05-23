@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { createIssuesController } from "./issues.controller";
+import {
+  createIssuesController,
+  getAllIssuesController,
+} from "./issues.controller";
 
 const router = Router();
 
-router.get("/", );
+router.get("/", getAllIssuesController);
 router.get("/:id");
 
 router.post("/", createIssuesController);
