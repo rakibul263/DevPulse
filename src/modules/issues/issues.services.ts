@@ -77,3 +77,30 @@ export const getAllIssuesIntoDb = async (payload: GetIssuesParams) => {
 
   return finalIssues;
 };
+
+export const getSingleIssueIntoDB = async (id: string) => {
+  const issueResult = await pool.query(
+    "SELECT * FROM issues WHERE id = $1",
+    [id]
+  );
+
+  if (issueResult.rows.length === 0) {
+    return null;
+  }
+
+  const issue = issueResult.rows[0];
+
+  const userResult = await pool.query(
+    "SELECT id, name, role FROM users WHERE id = $1",
+    [issue.reporter_id]
+  );
+
+  const reporter = userResult.rows[0] || null;
+
+  const { reporter_id, ...issueData } = issue;
+
+  return {
+    ...issueData,
+    reporter,
+  };
+};
