@@ -2,22 +2,41 @@ import pool from "../../database/db";
 import type { GetIssuesParams, TIssueData, UpdateIssueParams } from "./issues.interface";
 
 export const createIssuesIntoDB = async (payload: TIssueData) => {
-  const result = await pool.query(
-    `
-      INSERT INTO issues 
-      (title, description, type, status, reporter_id)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *
-    `,
-    [
-      payload.title,
-      payload.description,
-      payload.type,
-      "open",
-      payload.reporter_id,
-    ],
-  );
-  return result.rows[0];
+  if (!payload.title || !payload.description || !payload.type || !payload.reporter_id) {
+    throw new Error("Missing required fields: title, description, type, and reporter_id are required");
+  }
+
+  const validTypes = ["bug", "feature_request"];
+  if (!validTypes.includes(payload.type)) {
+    throw new Error("Invalid type. Must be 'bug' or 'feature_request'");
+  }
+
+  try {
+    const result = await pool.query(
+      `
+        INSERT INTO issues 
+        (title, description, type, status, reporter_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `,
+      [
+        payload.title,
+        payload.description,
+        payload.type,
+        "open",
+        payload.reporter_id,
+      ],
+    );
+    return result.rows[0];
+  } catch (error: any) {
+    if (error.code === "23503") {
+      throw new Error("Invalid reporter_id: user does not exist");
+    }
+    if (error.code === "23505") {
+      throw new Error("Duplicate entry detected");
+    }
+    throw new Error(`Database error: ${error.message}`);
+  }
 };
 
 export const getAllIssuesIntoDb = async (payload: GetIssuesParams) => {

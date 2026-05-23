@@ -28,6 +28,8 @@ export const initDatabase = async () => {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
   `;
+    await pool.query(createUsersTable);
+    await pool.query(createIssuesTable);
     console.log("Database tables create successfully.");
   } catch (error: any) {
     console.error("Error initializing database tables:", error);

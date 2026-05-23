@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import type { NextFunction, Request, Response } from 'express';
+import config from '../config';
 
 declare global {
   namespace Express {
@@ -27,7 +28,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   const token = authHeader.replace('Bearer ', '').trim();
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as any;
+    const decoded = jwt.verify(token, config.jwt_secret) as any;
     req.user = {
       id: decoded.id,
       name: decoded.name,

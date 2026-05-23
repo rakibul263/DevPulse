@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authenticateJWT } from "../../middlewares/auth.middleware";
 import {
   createIssuesController,
   deleteIssueController,
@@ -13,7 +14,7 @@ router.get("/", getAllIssuesController);
 router.get("/:id", getSingleController);
 
 router.post("/", createIssuesController);
-router.patch("/:id", updateIssueController);
-router.delete("/:id", deleteIssueController);
+router.patch("/:id", authenticateJWT, updateIssueController);
+router.delete("/:id", authenticateJWT, deleteIssueController);
 
 export default router;
