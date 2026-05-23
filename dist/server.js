@@ -527,6 +527,9 @@ var issues_routes_default = router2;
 // src/app.ts
 var app = express();
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome To DevPulse Server. Use this server link on your postman app." });
+});
 app.use("/api/auth", auth_router_default);
 app.use("/api/issues", issues_routes_default);
 var app_default = app;
